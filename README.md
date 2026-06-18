@@ -21,6 +21,9 @@ Deploy API với **canary strategy** và **automated analysis**:
 
 ```
 w10/
+├── rbac/                 # RBAC configuration
+│   ├── roles.yaml        # 3 roles: developer, sre, viewer
+│   └──   rolebindings.yaml # Bind users to roles
 ├── app-api/              # API Rollout manifests
 │   ├── rollout.yaml      # Argo Rollout với canary strategy
 │   ├── service.yaml      # Service expose API
@@ -37,6 +40,7 @@ w10/
 │   └── api/              # Flask API application
 ├── argocd/
 │   ├── apps/             # ArgoCD Application manifests
+│   │   ├── rbac.yaml     # Deploy RBAC
 │   │   ├── app-api.yaml  # Deploy API Rollout
 │   │   ├── app-analysis.yaml # Deploy AnalysisTemplate
 │   │   ├── app-alert.yaml # Deploy PrometheusRule
@@ -106,6 +110,7 @@ kubectl apply -f app-alert/email-secret.yaml
 - **API**: Flask application với metrics endpoint
 
 ### GitOps Applications
+- `rbac`: RBAC roles and bindings
 - `app-api`: API Rollout với canary strategy
 - `app-analysis`: AnalysisTemplate cho automated validation
 - `app-alert`: PrometheusRule cho runtime alerting
@@ -147,6 +152,35 @@ kubectl run test-query --image=curlimages/curl:latest --rm -i --restart=Never -n
 ```
 
 ## Test Scenarios (GitOps)
+
+### Lab 1.1: RBAC Testing
+
+#### Test với alice (developer trong demo namespace):
+```bash
+kubectl auth can-i create deploy -n demo --as alice          # yes
+kubectl auth can-i create deploy -n kube-system --as alice   # no
+kubectl auth can-i delete pod -n demo --as alice             # yes
+```
+
+#### Test với bob (sre toàn cluster):
+```bash
+kubectl auth can-i get pods -A --as bob                      # yes
+kubectl auth can-i get pods -n demo --as bob                 # yes
+kubectl auth can-i delete pod -n demo --as bob               # no
+kubectl auth can-i create pod/exec -n demo --as bob          # yes
+```
+
+#### Test với carol (viewer toàn cluster):
+```bash
+kubectl auth can-i get pods -A --as carol                    # yes
+kubectl auth can-i get deployments -n demo --as carol        # yes
+kubectl auth can-i delete nodes --as carol                   # no
+kubectl auth can-i create deploy -n demo --as carol          # no
+```
+
+**Chi tiết:** Xem [rbac/README.md](rbac/README.md) để hiểu đầy đủ về RBAC configuration.
+
+---
 
 ### Test 1: Successful Deployment (Success Rate ≥ 90%)
 ```bash
@@ -196,6 +230,7 @@ git push origin main
 
 ### Sync Waves
 ArgoCD applications deploy in order:
+- Wave -2: `rbac` (RBAC permissions)
 - Wave -1: `app-common` (namespace)
 - Wave 0: `k8s-prometheus`, `k8s-rollout` (infrastructure)
 - Wave 1: `app-analysis`, `app-alert` (configuration)
