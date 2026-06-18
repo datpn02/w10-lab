@@ -6,7 +6,9 @@ resources:
   - templates/psp-host-network.yaml
   - templates/psp-privileged.yaml
   - templates/required-resources.yaml
+  - templates/max-replicas.yaml
   - constraints/block-host-network.yaml
   - constraints/block-root-user.yaml
   - constraints/disallow-latest-tag.yaml
   - constraints/require-limits.yaml
+  - constraints/max-replicas.yaml
