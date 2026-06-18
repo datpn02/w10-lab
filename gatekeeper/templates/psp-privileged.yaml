@@ -20,6 +20,7 @@ spec:
       validation:
         openAPIV3Schema:
           type: object
+          preserveUnknownFields: false
           description: >-
             Controls running of privileged containers.
   targets:

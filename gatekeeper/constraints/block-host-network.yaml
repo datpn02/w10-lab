@@ -1,13 +1,4 @@
-# =============================================================================
 # Constraint: Block Host Network
-# =============================================================================
-#
-# SYNC WAVE: 2
-#
-# Cấm hostNetwork: true
-#
-# =============================================================================
-
 apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sPSPHostNetworkingPorts
 metadata:
@@ -23,7 +14,3 @@ spec:
         kinds: ["Deployment", "StatefulSet", "DaemonSet"]
     namespaces:
       - "demo"
-  parameters:
-    hostNetwork: false  # Không cho phép hostNetwork
-    min: 0
-    max: 0              # Không cho phép hostPort

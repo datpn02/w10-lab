@@ -1,11 +1,4 @@
-# =============================================================================
-# Constraint: Disallow :latest Tag (F-01)
-# =============================================================================
-#
-# SYNC WAVE: 2 (sau khi ConstraintTemplates được deploy ở wave 1)
-#
-# =============================================================================
-
+# Constraint: Disallow :latest Tag 
 apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sDisallowedTags
 metadata:
@@ -23,4 +16,4 @@ spec:
       - "demo"
   parameters:
     tags:
-      - "latest"  # Cấm tag :latest
+      - "latest" 

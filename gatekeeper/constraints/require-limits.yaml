@@ -1,4 +1,4 @@
-# Constraint: Require Resources Limits (F-02)
+# Constraint: Require Resources Limits
 apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: K8sRequiredResources
 metadata:

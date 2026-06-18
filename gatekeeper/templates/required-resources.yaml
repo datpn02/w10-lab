@@ -18,6 +18,7 @@ spec:
       validation:
         openAPIV3Schema:
           type: object
+          preserveUnknownFields: false
           properties:
             limits:
               description: >-
