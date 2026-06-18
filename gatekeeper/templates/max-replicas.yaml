@@ -30,5 +30,5 @@ spec:
           replicas := object.get(input.review.object.spec, "replicas", 1)
           max := input.parameters.maxReplicas
           replicas > max
-          msg := sprintf("F-05: Deployment <%v> has replicas <%v>, which exceeds maxReplicas <%v>", [input.review.object.metadata.name, replicas, max])
+          msg := sprintf("Deployment <%v> has replicas <%v>, which exceeds maxReplicas <%v>", [input.review.object.metadata.name, replicas, max])
         }
