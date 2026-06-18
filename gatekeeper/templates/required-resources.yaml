@@ -1,0 +1,57 @@
+# ConstraintTemplate: Required Resources (Ultra Simplified)
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredresources
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    metadata.gatekeeper.sh/title: "Required Resources"
+    metadata.gatekeeper.sh/version: 1.0.0
+    description: >-
+      Requires containers to have specified resource limits set.
+      Configure which limits to check via parameters.limits array.
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredResources
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            limits:
+              description: >-
+                List of required resource limits (e.g., ["cpu", "memory"]).
+                Each container must have all specified limits.
+              type: array
+              items:
+                type: string
+  
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredresources
+
+        violation[{"msg": msg}] {
+          container := input_containers[_]
+          required := input.parameters.limits[_]
+          not has_limit(container, required)
+          msg := sprintf("F-02: Container <%v> does not have resource limit <%v>", [container.name, required])
+        }
+
+
+        has_limit(container, limit) {
+          container.resources.limits[limit]
+        }
+
+        input_containers[c] {
+          c := input.review.object.spec.containers[_]
+        }
+        
+        input_containers[c] {
+          c := input.review.object.spec.initContainers[_]
+        }
+        
+        input_containers[c] {
+          c := input.review.object.spec.ephemeralContainers[_]
+        }

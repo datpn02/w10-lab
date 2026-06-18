@@ -1,0 +1,26 @@
+# =============================================================================
+# Constraint: Disallow :latest Tag (F-01)
+# =============================================================================
+#
+# SYNC WAVE: 2 (sau khi ConstraintTemplates được deploy ở wave 1)
+#
+# =============================================================================
+
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sDisallowedTags
+metadata:
+  name: disallow-latest-tag
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+      - apiGroups: ["apps"]
+        kinds: ["Deployment", "StatefulSet", "DaemonSet"]
+    namespaces:
+      - "demo"
+  parameters:
+    tags:
+      - "latest"  # Cấm tag :latest

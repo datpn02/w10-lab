@@ -1,0 +1,59 @@
+# ConstraintTemplate: PSP Privileged (Gatekeeper Library)
+# Source: https://github.com/open-policy-agent/gatekeeper-library/blob/master/library/pod-security-policy/privileged-containers/template.yaml
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8spspprivileged
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    metadata.gatekeeper.sh/title: "Privileged Container"
+    metadata.gatekeeper.sh/version: 1.0.1
+    description: >-
+      Controls running of privileged containers. Corresponds to the
+      `privileged` field in a PodSecurityPolicy. For more information, see
+      https://kubernetes.io/docs/concepts/policy/pod-security-policy/#privileged
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sPSPPrivileged
+      validation:
+        openAPIV3Schema:
+          type: object
+          description: >-
+            Controls running of privileged containers.
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8spspprivileged
+
+        violation[{"msg": msg, "details": {}}] {
+            c := input_containers[_]
+            c.securityContext.privileged
+            msg := sprintf("Privileged container is not allowed: %v, securityContext: %v", [c.name, c.securityContext])
+        }
+
+        # Check runAsUser is not 0 (root)
+        violation[{"msg": msg, "details": {}}] {
+            c := input_containers[_]
+            c.securityContext.runAsUser == 0
+            msg := sprintf("Container <%v> cannot run as root (runAsUser: 0). Use non-root user.", [c.name])
+        }
+
+        # Check pod-level runAsUser
+        violation[{"msg": msg, "details": {}}] {
+            input.review.object.spec.securityContext.runAsUser == 0
+            msg := "Pod securityContext cannot run as root (runAsUser: 0). Use non-root user."
+        }
+
+        input_containers[c] {
+            c := input.review.object.spec.containers[_]
+        }
+
+        input_containers[c] {
+            c := input.review.object.spec.initContainers[_]
+        }
+
+        input_containers[c] {
+            c := input.review.object.spec.ephemeralContainers[_]
+        }

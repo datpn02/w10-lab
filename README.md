@@ -21,9 +21,13 @@ Deploy API với **canary strategy** và **automated analysis**:
 
 ```
 w10/
-├── rbac/                 # RBAC configuration
+├── rbac/                 # RBAC configuration (Lab 1.1)
 │   ├── roles.yaml        # 3 roles: developer, sre, viewer
-│   └──   rolebindings.yaml # Bind users to roles
+│   ├── rolebindings.yaml # Bind users to roles
+│   └── README.md         # RBAC documentation
+├── gatekeeper/           # OPA Gatekeeper policies (Lab 1.2)
+│   ├── templates/        # ConstraintTemplates (Rego policies)
+│   └── constraints/      # Constraints
 ├── app-api/              # API Rollout manifests
 │   ├── rollout.yaml      # Argo Rollout với canary strategy
 │   ├── service.yaml      # Service expose API
@@ -40,7 +44,9 @@ w10/
 │   └── api/              # Flask API application
 ├── argocd/
 │   ├── apps/             # ArgoCD Application manifests
-│   │   ├── rbac.yaml     # Deploy RBAC
+│   │   ├── rbac.yaml     # Deploy RBAC (Lab 1.1)
+│   │   ├── gatekeeper.yaml # Deploy Gatekeeper policies (Lab 1.2)
+│   │   ├── gatekeeper-controller.yaml # Deploy Gatekeeper controller (Lab 1.2)
 │   │   ├── app-api.yaml  # Deploy API Rollout
 │   │   ├── app-analysis.yaml # Deploy AnalysisTemplate
 │   │   ├── app-alert.yaml # Deploy PrometheusRule
@@ -167,7 +173,7 @@ kubectl auth can-i delete pod -n demo --as alice             # yes
 kubectl auth can-i get pods -A --as bob                      # yes
 kubectl auth can-i get pods -n demo --as bob                 # yes
 kubectl auth can-i delete pod -n demo --as bob               # no
-kubectl auth can-i create pod/exec -n demo --as bob          # yes
+kubectl auth can-i create pods --subresource=exec -n demo --as bob          # yes
 ```
 
 #### Test với carol (viewer toàn cluster):
@@ -176,9 +182,6 @@ kubectl auth can-i get pods -A --as carol                    # yes
 kubectl auth can-i get deployments -n demo --as carol        # yes
 kubectl auth can-i delete nodes --as carol                   # no
 kubectl auth can-i create deploy -n demo --as carol          # no
-```
-
-**Chi tiết:** Xem [rbac/README.md](rbac/README.md) để hiểu đầy đủ về RBAC configuration.
 
 ---
 
