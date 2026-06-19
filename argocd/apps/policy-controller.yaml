@@ -27,4 +27,4 @@ spec:
       kind: ValidatingWebhookConfiguration
       name: policy.sigstore.dev
       jsonPointers:
-        - /webhooks/0/namespaceSelector/matchExpressions
+        - /webhooks/0/namespaceSelector/matchExpressions/0
